@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People
+from models import db, User, People, Planets, Vehicles
 #from models import Person
 
 app = Flask(__name__)
@@ -109,6 +109,137 @@ def edit_user():
     db.session.commit()
   
     return jsonify(user.serialize()), 200
+
+#API PEOPLE_______________________________
+@app.route('/get-people/<int:id>', methods=['GET'])
+def get_specific_people(id):
+    user = People.query.get(id)    
+  
+    return jsonify(people.serialize()), 200
+
+
+@app.route('/post-peolpe', methods=['POST'])
+def post_specific_people():
+    body = request.get_json()   
+    id = body["id"]
+
+    people = People.query.get(id)   
+  
+    return jsonify(people.serialize()), 200
+
+@app.route('/delete-people', methods=['DELETE'])
+def delete_specific_people():
+    body = request.get_json()   
+    id = body["id"]
+
+    people = People.query.get(id) 
+
+    db.session.delete(people)
+    db.session.commit()  
+  
+    return jsonify("StartWars Character Deleted"), 200
+
+@app.route('/put-user', methods=['PUT'])
+def edit_People():
+    body = request.get_json()   
+    id = body["id"]
+    name = body["name"]
+
+    people = People.query.get(id)   
+    people.name = name #modifique el nombre del usuario
+
+    db.session.commit()
+  
+    return jsonify(people.serialize()), 200
+
+#API PLANETS_______________________________
+
+@app.route('/get-planets/<int:id>', methods=['GET'])
+def get_specific_planets(id):
+    user = Plantes.query.get(id)    
+  
+    return jsonify(planets.serialize()), 200
+
+
+@app.route('/post-planets', methods=['POST'])
+def post_specific_planets():
+    body = request.get_json()   
+    id = body["id"]
+
+    planets = Planets.query.get(id)   
+  
+    return jsonify(people.serialize()), 200
+
+@app.route('/delete-planets', methods=['DELETE'])
+def delete_specific_planets():
+    body = request.get_json()   
+    id = body["id"]
+
+    planets = Planets.query.get(id) 
+
+    db.session.delete(planets)
+    db.session.commit()  
+  
+    return jsonify("StartWars Planet Deleted"), 200
+
+@app.route('/put-planet', methods=['PUT'])
+def edit_Planets():
+    body = request.get_json()   
+    id = body["id"]
+    name = body["name"]
+
+    planets = Planets.query.get(id)   
+    planets.name = name #modifique el nombre del usuario
+
+    db.session.commit()
+  
+    return jsonify(planets.serialize()), 200
+
+#API VEHICLES_______________________________
+
+@app.route('/get-vehicles/<int:id>', methods=['GET'])
+def get_specific_Vehicles(id):
+    user = Vehicles.query.get(id)    
+  
+    return jsonify(planets.serialize()), 200
+
+
+@app.route('/post-vehicles', methods=['POST'])
+def post_specific_Vehicles():
+    body = request.get_json()   
+    id = body["id"]
+
+    vehicles = Vehicles.query.get(id)   
+  
+    return jsonify(people.serialize()), 200
+
+@app.route('/delete-vehicles', methods=['DELETE'])
+def delete_specific_Vehicles():
+    body = request.get_json()   
+    id = body["id"]
+
+    vehicles = Vehicles.query.get(id) 
+
+    db.session.delete(Vehicles)
+    db.session.commit()  
+  
+    return jsonify("StartWars Planet Deleted"), 200
+
+@app.route('/put-vehicles', methods=['PUT'])
+def edit_Vehicles():
+    body = request.get_json()   
+    id = body["id"]
+    name = body["name"]
+
+    vehicles = Vehicles.query.get(id)   
+    vehicles.name = name #modifique el nombre del usuario
+
+    db.session.commit()
+  
+    return jsonify(vehicles.serialize()), 200
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

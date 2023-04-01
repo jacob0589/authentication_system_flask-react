@@ -22,12 +22,77 @@ class User(db.Model):
 
 class People(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    
-    name = db.Column(db.String(120), unique=False, nullable=False)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    height = db.Column(db.String(120), unique=False, nullable=False)
+    mass = db.Column(db.String(120), unique=False, nullable=False)
+    skin_Color = db.Column(db.String(120), unique=False, nullable=False)
+    eye_Color = db.Column(db.String(120), unique=False, nullable=False)
+    birth_year = db.Column(db.String(120), unique=False, nullable=False)
+    gender = db.Column(db.String(120), unique=False, nullable=False)
 
     def serialize(self):
         return {
             "id": self.id,        
+            "name": self.name,
+            "height": self.height,
+            "mass": self.mass,
+            "skin_Color": self.skin_Color,
+            "eye_Color": self.eye_Color,
+            "birth_year": self.birth_year,
+            "gender": self.gender
+            # do not serialize the password, its a security breach
+        }
+
+class Planets(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    diameter = db.Column(db.Integer, nullable=False)
+    rotation_period = db.Column(db.Integer, nullable=False)
+    orbital_period = db.Column(db.Integer, nullable=False)
+    gravity = db.Column(db.String(100), nullable=False)
+    population = db.Column(db.Integer, nullable=False)
+    climate = db.Column(db.String(250), nullable=False)
+    terrain = db.Column(db.String(250), nullable=False)
+    surface_water = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(250), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,        
+            "diameter": self.diameter,
+            "rotation_period": self.rotation_period,
+            "orbital_period": self.orbital_period,
+            "gravity": self.gravity,
+            "population": self.population,
+            "climate": self.climate,
+            "terrain": self.terrain,
+            "surface_water": self.surface_water,
+            "name": self.name
+            # do not serialize the password, its a security breach
+        }
+
+class Vehicles(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    vehicle_class = db.Column(db.String(250), nullable=False)
+    manufacturer = db.Column(db.String(250), nullable=False)
+    cost_in_credits = db.Column(db.Integer, nullable=False)
+    length = db.Column(db.Float, nullable=False)
+    crew = db.Column(db.Integer, nullable=False)
+    passengers = db.Column(db.Integer, nullable=False)
+    max_atmosphering_speed = db.Column(db.Integer, nullable=False)
+    cargo_capacity = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(250), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,        
+            "vehicle_class": self.diameter,
+            "manufacturer": self.rotation_period,
+            "cost_in_credits": self.orbital_period,
+            "length": self.gravity,
+            "crew": self.population,
+            "passengers": self.climate,
+            "max_atmosphering_speed": self.terrain,
+            "cargo_capacity": self.surface_water,
             "name": self.name
             # do not serialize the password, its a security breach
         }
