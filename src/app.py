@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planets, Vehicles
+from models import db, User, People, Planets, Vehicles, FavoritePeople
 #from models import Person
 
 app = Flask(__name__)
@@ -43,6 +43,7 @@ def handle_hello():
     print(users)
   
     return jsonify(users), 200
+
 
 @app.route('/register', methods=['POST'])
 def register_user():
@@ -111,6 +112,14 @@ def edit_user():
     return jsonify(user.serialize()), 200
 
 #API PEOPLE_______________________________
+@app.route('/people', methods=['GET'])
+def get_people():
+    people = People.query.all()  #<User Les>
+    people = list(map(lambda item: item.serialize(), people)) #{name:Antonio, password:123, ....} {name:Usuario2, password:123.... }
+    print(people)
+  
+    return jsonify(people), 200
+
 @app.route('/get-people/<int:id>', methods=['GET'])
 def get_specific_people(id):
     user = People.query.get(id)    
@@ -139,7 +148,7 @@ def delete_specific_people():
   
     return jsonify("StartWars Character Deleted"), 200
 
-@app.route('/put-user', methods=['PUT'])
+@app.route('/put-people', methods=['PUT'])
 def edit_People():
     body = request.get_json()   
     id = body["id"]
@@ -152,7 +161,41 @@ def edit_People():
   
     return jsonify(people.serialize()), 200
 
+@app.route('/favoritePeople', methods=['POST'])
+def add_favorite_pleope():
+    body = request.get_json()
+    user_id =["user_id"]
+    People_id = ["people_id"]
+
+    character = People.query.get(people_id)
+    if not character:
+        raise APIException('Character Not Found', status_code=404)
+    
+    user = User.query.get(user_id).first()
+    if not user:
+        raise APIException('User Not Found', status_code=404)
+
+    fav_exist = favoritePeople.query.filter_by(user_id = user.id, people_id = character.id).first() is not None
+
+    if fav_exist:
+        raise APIException('Favorite already exists ', status_code=404)
+    
+    favorite_people = favoritePeople(user_id = user.id, people_id = character.id)
+    db.session.add(favorite_people) #agregamos el nuevo usuario a la base de datos
+    db.session.commit()
+
+    return jsonify(favorite_people.serialize()), 200
+
+
+
 #API PLANETS_______________________________
+@app.route('/planets', methods=['GET'])
+def get_planets():
+    planets = Planets.query.all()  #<User Les>
+    planets = list(map(lambda item: item.serialize(), planets)) #{name:Antonio, password:123, ....} {name:Usuario2, password:123.... }
+    print(planets)
+  
+    return jsonify(people), 200
 
 @app.route('/get-planets/<int:id>', methods=['GET'])
 def get_specific_planets(id):
@@ -196,6 +239,13 @@ def edit_Planets():
     return jsonify(planets.serialize()), 200
 
 #API VEHICLES_______________________________
+@app.route('/vehicles', methods=['GET'])
+def get_vehicles():
+    vehicles = Vehicles.query.all()  #<User Les>
+    vehicles = list(map(lambda item: item.serialize(), vehicles)) #{name:Antonio, password:123, ....} {name:Usuario2, password:123.... }
+    print(vehicles)
+  
+    return jsonify(people), 200
 
 @app.route('/get-vehicles/<int:id>', methods=['GET'])
 def get_specific_Vehicles(id):
@@ -239,7 +289,12 @@ def edit_Vehicles():
     return jsonify(vehicles.serialize()), 200
 
 
-
+# Favorites*************************
+@app.route('/favorites', methods=['POST'])
+def list_favorites():
+    body = request.get_json
+    user_id = body["user_id"]
+    
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
