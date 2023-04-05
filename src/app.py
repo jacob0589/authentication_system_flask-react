@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planets, Vehicles, FavoritePeople
+from models import db, User, People, Planets, Vehicles, FavoritePeople, FavoriteVehicles
 #from models import Person
 
 app = Flask(__name__)
@@ -112,13 +112,22 @@ def edit_user():
     return jsonify(user.serialize()), 200
 
 #API PEOPLE_______________________________
+#API PEOPLE_______________________________
+#API PEOPLE_______________________________
+
 @app.route('/people', methods=['GET'])
 def get_people():
     people = People.query.all()  #<User Les>
     people = list(map(lambda item: item.serialize(), people)) #{name:Antonio, password:123, ....} {name:Usuario2, password:123.... }
     print(people)
   
-    return jsonify(people), 200
+    #return jsonify(people), 200
+    Poeplebody = {
+        "msg": "Done",
+        "people": people
+    }
+
+    return jsonify(Poeplebody)
 
 @app.route('/get-people/<int:id>', methods=['GET'])
 def get_specific_people(id):
@@ -131,9 +140,28 @@ def get_specific_people(id):
 def post_specific_people():
     body = request.get_json()   
     id = body["id"]
+    name = body["name"]
+    gender = body["gender"]
+    eyes_color = body["eyes_color"]
+    height = body["height"]
+
+    if body is None:
+        raise APIException("You need to specify the request body as json object", status_code=404)
+    if "name" not in body:
+        raise APIException("You need to specify the name", status_code=404)
+    if "gender" not in body:
+        raise APIException("You need to specify the birthdate", status_code=404)
+    if "eyes_color" not in body:
+        raise APIException("You need to specify the eyes", status_code=404)
+    if "height" not in body:
+        raise APIException("You need to specify the height", status_code=404)
 
     people = People.query.get(id)   
-  
+    newCharacter = People(name=name, gender=gender, eyes_color=eyes_color, height=height)
+
+    db.session.add(newCharacter)
+    db.session.commit()
+
     return jsonify(people.serialize()), 200
 
 @app.route('/delete-people', methods=['DELETE'])
@@ -153,13 +181,31 @@ def edit_People():
     body = request.get_json()   
     id = body["id"]
     name = body["name"]
+    gender = body["gender"]
+    eyes_color = body["eyes_color"]
+    height = body["height"]
+
+    if body is None:
+        raise APIException("You need to specify the request body as json object", status_code=404)
+    if "name" not in body:
+        raise APIException("You need to specify the name", status_code=404)
+    if "gender" not in body:
+        raise APIException("You need to specify the birthdate", status_code=404)
+    if "eyes_color" not in body:
+        raise APIException("You need to specify the eyes", status_code=404)
+    if "height" not in body:
+        raise APIException("You need to specify the height", status_code=404)
 
     people = People.query.get(id)   
     people.name = name #modifique el nombre del usuario
+    people.gender = gender
+    people.eyes_color = eyes_color
+    people.height = height
 
     db.session.commit()
   
     return jsonify(people.serialize()), 200
+
 
 @app.route('/favoritePeople', methods=['POST'])
 def add_favorite_pleope():
@@ -230,6 +276,7 @@ def edit_Planets():
     body = request.get_json()   
     id = body["id"]
     name = body["name"]
+    
 
     planets = Planets.query.get(id)   
     planets.name = name #modifique el nombre del usuario
@@ -318,9 +365,9 @@ def edit_Vehicles():
 def add_favorite_vehicles():
     body = request.get_json()
     user_id =["user_id"]
-    Planets_id = ["planets_id"]
+    Vehicles_id = ["planets_id"]
 
-    vehicles = Vehicles.query.get(planets_id)
+    vehicles = Vehicles.query.get(vehicles_id)
     if not vehicles:
         raise APIException('Planet Not Found', status_code=404)
     
@@ -328,23 +375,37 @@ def add_favorite_vehicles():
     if not user:
         raise APIException('User Not Found', status_code=404)
 
-    fav_exist = favoriteVehicles.query.filter_by(user_id = user.id, planets_id = planets.id).first() is not None
+    fav_exist = favoriteVehicles.query.filter_by(user_id = user.id, vehicles_id = vehicles.id).first() is not None
 
     if fav_exist:
         raise APIException('Favorite already exists ', status_code=404)
     
-    favorite_vehicles = favoritePlanets(user_id = user.id, planets_id = planets.id)
+    favorite_vehicles = favoriteVehicles(user_id = user.id, vehicles_id = vehicles.id)
     db.session.add(favorite_vehicles) #agregamos el nuevo usuario a la base de datos
     db.session.commit()
 
-    return jsonify(favorite_planets.serialize()), 200
+    return jsonify(favorite_vehicles.serialize()), 200
 
 
 # Favorites*************************
-@app.route('/favorites', methods=['POST'])
-def list_favorites():
-    body = request.get_json
-    user_id = body["user_id"]
+@app.route('/favorites', methods=['GET'])
+def list_favorites(user_id):
+    
+    user = User.query.get(user_id)
+    if not user:
+        raise APIException('User Not Found', status_code=404)
+
+    favorite_people = list(map(lambda item: item.serialize()["people_name"], FavoritePeople.query.filter_by(user_id=user.id)))
+    favorite_planets = list(map(lambda item: item.serialize()["planet_name"], FavoritePlanets.query.filter_by(user_id=user.id)))
+    favorite_vehicles = list(map(lambda item: item.serialize()["vehicle_name"], FavoriteVehicles.query.filter_by(user_id=user.id)))
+
+    return jsonify({
+        "msg":"ok",
+        "all_favorites": favorite_people + favorite_planets + favorite_vehicles,
+        "favorite_people": favorite_people,
+        "favorite_planets": favorite_planets,
+        "favorite_vehicles": favorite_vehicles
+    }), 200
     
 
 # this only runs if `$ python src/app.py` is executed
