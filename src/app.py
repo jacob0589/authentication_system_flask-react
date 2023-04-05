@@ -123,7 +123,7 @@ def get_people():
   
     #return jsonify(people), 200
     Poeplebody = {
-        "msg": "Done",
+        "msg": "Ok",
         "people": people
     }
 
@@ -238,10 +238,16 @@ def add_favorite_pleope():
 @app.route('/planets', methods=['GET'])
 def get_planets():
     planets = Planets.query.all()  #<User Les>
-    planets = list(map(lambda item: item.serialize(), planets)) #{name:Antonio, password:123, ....} {name:Usuario2, password:123.... }
+    planets = list(map(lambda item: item.serialize(), planets)) 
     print(planets)
   
-    return jsonify(people), 200
+    #return jsonify(people), 200
+    Planetsbody = {
+        "msg": "Done",
+        "planets": planets
+    }
+
+    return jsonify(Planetsbody)
 
 @app.route('/get-planets/<int:id>', methods=['GET'])
 def get_specific_planets(id):
@@ -254,10 +260,44 @@ def get_specific_planets(id):
 def post_specific_planets():
     body = request.get_json()   
     id = body["id"]
+    diameter = body["diameter"]
+    rotation_period = body["rotation_period"]
+    orbital_period = body["orbital_period"]
+    gravity = body["gravity"]
+    population = body["population"]
+    climate = body["climate"]
+    terrain = body["terrain"]
+    surface_water = body["surface_water"]
+    name = body["name"]
+
+    if body is None:
+        raise APIException("You need to specify the request body as json object", status_code=404)
+    if "name" not in body:
+        raise APIException("You need to specify the name", status_code=404)
+    if "diameter" not in body:
+        raise APIException("You need to specify the diameter", status_code=404)
+    if "rotation" not in body:
+        raise APIException("You need to specify the rotation", status_code=404)
+    if "orbital" not in body:
+        raise APIException("You need to specify the orbital", status_code=404)
+    if "gravity" not in body:
+        raise APIException("You need to specify the gravity", status_code=404)
+    if "population" not in body:
+        raise APIException("You need to specify the population", status_code=404)
+    if "climate" not in body:
+        raise APIException("You need to specify the climate", status_code=404)
+    if "terrain" not in body:
+        raise APIException("You need to specify the terrain", status_code=404)
+    if "surface_water" not in body:
+        raise APIException("You need to specify the surface_water", status_code=404)
 
     planets = Planets.query.get(id)   
-  
-    return jsonify(people.serialize()), 200
+    newPlanet = Planet(surface_water = surface_water, terrain = terrain, climate = climate, population = population, name=name, diameter = diameter, rotation = rotation, orbital = orbital, gravity = gravity)
+
+    db.session.add(newPlanet)
+    db.session.commit()
+
+    return jsonify(planet.serialize()), 200
 
 @app.route('/delete-planets', methods=['DELETE'])
 def delete_specific_planets():
@@ -276,10 +316,46 @@ def edit_Planets():
     body = request.get_json()   
     id = body["id"]
     name = body["name"]
-    
+    diameter = body["diameter"]
+    rotation_period = body["rotation_period"]
+    orbital_period = body["orbital_period"]
+    gravity = body["gravity"]
+    population = body["population"]
+    climate = body["climate"]
+    terrain = body["terrain"]
+    surface_water = body["surface_water"]
+
+    if body is None:
+        raise APIException("You need to specify the request body as json object", status_code=404)
+    if "name" not in body:
+        raise APIException("You need to specify the name", status_code=404)
+    if "diameter" not in body:
+        raise APIException("You need to specify the diameter", status_code=404)
+    if "rotation" not in body:
+        raise APIException("You need to specify the rotation", status_code=404)
+    if "orbital" not in body:
+        raise APIException("You need to specify the orbital", status_code=404)
+    if "gravity" not in body:
+        raise APIException("You need to specify the gravity", status_code=404)
+    if "population" not in body:
+        raise APIException("You need to specify the population", status_code=404)
+    if "climate" not in body:
+        raise APIException("You need to specify the climate", status_code=404)
+    if "terrain" not in body:
+        raise APIException("You need to specify the terrain", status_code=404)
+    if "surface_water" not in body:
+        raise APIException("You need to specify the surface_water", status_code=404)
 
     planets = Planets.query.get(id)   
     planets.name = name #modifique el nombre del usuario
+    planets.diameter = diameter
+    planets.rotation = rotation
+    planets.orbital = orbital
+    planets.gravity = gravity
+    planets.population = population
+    planets.climate = climate
+    planets.terrain = terrain
+
 
     db.session.commit()
   
@@ -324,7 +400,14 @@ def get_vehicles():
 def get_specific_Vehicles(id):
     user = Vehicles.query.get(id)    
   
-    return jsonify(planets.serialize()), 200
+    #return jsonify(planets.serialize()), 200
+    Vehiclesbody = {
+        "msg": "Done",
+        "vehicles": vehicles
+    }
+
+    return jsonify(Vehiclesbody)
+    
 
 
 @app.route('/post-vehicles', methods=['POST'])
