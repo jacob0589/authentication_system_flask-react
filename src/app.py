@@ -238,6 +238,32 @@ def edit_Planets():
   
     return jsonify(planets.serialize()), 200
 
+
+@app.route('/favoritePlanets', methods=['POST'])
+def add_favorite_planets():
+    body = request.get_json()
+    user_id =["user_id"]
+    Planets_id = ["planets_id"]
+
+    planets = Planets.query.get(planets_id)
+    if not planets:
+        raise APIException('Planet Not Found', status_code=404)
+    
+    user = User.query.get(user_id).first()
+    if not user:
+        raise APIException('User Not Found', status_code=404)
+
+    fav_exist = favoritePlanets.query.filter_by(user_id = user.id, planets_id = planets.id).first() is not None
+
+    if fav_exist:
+        raise APIException('Favorite already exists ', status_code=404)
+    
+    favorite_planets = favoritePlanets(user_id = user.id, planets_id = planets.id)
+    db.session.add(favorite_planets) #agregamos el nuevo usuario a la base de datos
+    db.session.commit()
+
+    return jsonify(favorite_planets.serialize()), 200
+
 #API VEHICLES_______________________________
 @app.route('/vehicles', methods=['GET'])
 def get_vehicles():
@@ -287,6 +313,31 @@ def edit_Vehicles():
     db.session.commit()
   
     return jsonify(vehicles.serialize()), 200
+
+@app.route('/favoriteVehicles', methods=['POST'])
+def add_favorite_vehicles():
+    body = request.get_json()
+    user_id =["user_id"]
+    Planets_id = ["planets_id"]
+
+    vehicles = Vehicles.query.get(planets_id)
+    if not vehicles:
+        raise APIException('Planet Not Found', status_code=404)
+    
+    user = User.query.get(user_id).first()
+    if not user:
+        raise APIException('User Not Found', status_code=404)
+
+    fav_exist = favoriteVehicles.query.filter_by(user_id = user.id, planets_id = planets.id).first() is not None
+
+    if fav_exist:
+        raise APIException('Favorite already exists ', status_code=404)
+    
+    favorite_vehicles = favoritePlanets(user_id = user.id, planets_id = planets.id)
+    db.session.add(favorite_vehicles) #agregamos el nuevo usuario a la base de datos
+    db.session.commit()
+
+    return jsonify(favorite_planets.serialize()), 200
 
 
 # Favorites*************************
