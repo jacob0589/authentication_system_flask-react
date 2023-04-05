@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planets, Vehicles, FavoritePeople, FavoriteVehicles
+from models import db, User, People, Planets, Vehicles, FavoritePeople, FavoritePlanets, FavoriteVehicles
 #from models import Person
 
 app = Flask(__name__)
@@ -292,7 +292,7 @@ def post_specific_planets():
         raise APIException("You need to specify the surface_water", status_code=404)
 
     planets = Planets.query.get(id)   
-    newPlanet = Planet(surface_water = surface_water, terrain = terrain, climate = climate, population = population, name=name, diameter = diameter, rotation = rotation, orbital = orbital, gravity = gravity)
+    newPlanet = Planets(surface_water = surface_water, terrain = terrain, climate = climate, population = population, name=name, diameter = diameter, rotation = rotation, orbital = orbital, gravity = gravity)
 
     db.session.add(newPlanet)
     db.session.commit()
@@ -414,9 +414,43 @@ def get_specific_Vehicles(id):
 def post_specific_Vehicles():
     body = request.get_json()   
     id = body["id"]
+    vehicle_class = body["vehicle_class"]
+    manufacturer = body["manufacturer"]
+    cost_in_credits = body["cost_in_credits"]
+    length = body["length"]
+    crew = body["crew"]
+    passengers = body["passengers"]
+    max_atmosphering_speed = body["max_atmosphering_speed"]
+    cargo_capacity = body["cargo_capacity"]
+    name = body["name"]
 
-    vehicles = Vehicles.query.get(id)   
-  
+    if body is None:
+        raise APIException("You need to specify the request body as json object", status_code=404)
+    if "name" not in body:
+        raise APIException("You need to specify the name", status_code=404)
+    if "vehicle_class" not in body:
+        raise APIException("You need to specify the vehicle_class", status_code=404)
+    if "manufacturer" not in body:
+        raise APIException("You need to specify the manufacturer", status_code=404)
+    if "cost_in_credits" not in body:
+        raise APIException("You need to specify the cost_in_credits", status_code=404)
+    if "length" not in body:
+        raise APIException("You need to specify the length", status_code=404)
+    if "crew" not in body:
+        raise APIException("You need to specify the crew", status_code=404)
+    if "passengers" not in body:
+        raise APIException("You need to specify the passengers", status_code=404)
+    if "max_atmosphering_speed" not in body:
+        raise APIException("You need to specify the max_atmosphering_speed", status_code=404)
+    if "cargo_capacity" not in body:
+        raise APIException("You need to specify the cargo_capacity", status_code=404)
+
+    vehicles = Vehicles.query.get(id) 
+    newVehicle = Vehicles(cargo_capacity = cargo_capacity, max_atmosphering_speed = max_atmosphering_speed, passengers = passengers, crew = crew,length = length, name = name, vehicle_class = vehicle_class, manufacturer = manufacturer, cost_in_credits = cost_in_credits)  
+    
+    db.session.add(newVehicle)
+    db.session.commit() 
+
     return jsonify(people.serialize()), 200
 
 @app.route('/delete-vehicles', methods=['DELETE'])
@@ -436,9 +470,47 @@ def edit_Vehicles():
     body = request.get_json()   
     id = body["id"]
     name = body["name"]
+    vehicle_class = body["vehicle_class"]
+    manufacturer = body["manufacturer"]
+    cost_in_credits = body["cost_in_credits"]
+    length = body["length"]
+    crew = body["crew"]
+    passengers = body["passengers"]
+    max_atmosphering_speed = body["max_atmosphering_speed"]
+    cargo_capacity = body["cargo_capacity"]
+    name = body["name"]
+
+    if body is None:
+        raise APIException("You need to specify the request body as json object", status_code=404)
+    if "name" not in body:
+        raise APIException("You need to specify the name", status_code=404)
+    if "vehicle_class" not in body:
+        raise APIException("You need to specify the vehicle_class", status_code=404)
+    if "manufacturer" not in body:
+        raise APIException("You need to specify the manufacturer", status_code=404)
+    if "cost_in_credits" not in body:
+        raise APIException("You need to specify the cost_in_credits", status_code=404)
+    if "length" not in body:
+        raise APIException("You need to specify the length", status_code=404)
+    if "crew" not in body:
+        raise APIException("You need to specify the crew", status_code=404)
+    if "passengers" not in body:
+        raise APIException("You need to specify the passengers", status_code=404)
+    if "max_atmosphering_speed" not in body:
+        raise APIException("You need to specify the max_atmosphering_speed", status_code=404)
+    if "cargo_capacity" not in body:
+        raise APIException("You need to specify the cargo_capacity", status_code=404)
 
     vehicles = Vehicles.query.get(id)   
-    vehicles.name = name #modifique el nombre del usuario
+    vehicles.name = name #modifique el nombre de la nave
+    vehicles.vehicle_class = vehicle_class
+    vehicles.manufacturer = manufacturer
+    vehicles.cost_in_credits = cost_in_credits
+    vehicles.length = length
+    vehicles.crew = crew
+    vehicles.passengers = passengers
+    vehicles.max_atmosphering_speed = max_atmosphering_speed
+    vehicles.cargo_capacity = cargo_capacity
 
     db.session.commit()
   
