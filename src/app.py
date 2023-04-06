@@ -8,11 +8,22 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planets, Vehicles, FavoritePeople, FavoritePlanets, FavoriteVehicles
+from models import db, User, People, Planets, Vehicles, FavoritePeople, FavoritePlanets, FavoriteVehicles, TokenBlockedList
 #from models import Person
+
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
+
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = os.getenv("FLASK_APP_KEY" ) # Change this!
+jwt = JWTManager(app)
 
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
@@ -561,7 +572,39 @@ def list_favorites(user_id):
         "favorite_planets": favorite_planets,
         "favorite_vehicles": favorite_vehicles
     }), 200
-    
+
+# Login*************************
+# Login*************************
+# Login*************************
+# Login*************************
+
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.get_json()["email"]
+    password = request.get_json()["password"]
+
+    userEmailLogin = User.query.filter_by(email=email).first()
+
+    if user is None:
+        return jsonify({"message":"Login failed"}), 401
+
+ #Esta veificaicon es para el inicio de la aplicacion Go all the way Up
+    """ if password != user.password:
+        return jsonify({"message":"Login failed"}), 401 """
+
+# create_access_token() function is used to actually generate the JWT.
+    access_token = create_access_token(identity=user.id)
+    return jsonify({"token":access_token}), 200
+
+# Protect a route with jwt_required, which will kick out requests
+# without a valid JWT present.
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    print("UserName:", user.name)
+    current_user = get_jwt_identity()
+    return jsonify({"Msg":"This is a protected route"}), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
