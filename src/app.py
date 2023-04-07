@@ -16,12 +16,18 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 
+from datetime import date, time, datetime, timezone, timedelta
+
+from flask_bcrypt import Bcrypt #librería para encriptaciones
 
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+#Inicio de instancia de Bcrypt
+bcrypt = Bcrypt(app)
 
 # Setup the Flask-JWT-Extended extension
+#Inicio de instancia de JWT
 app.config["JWT_SECRET_KEY"] = os.getenv("FLASK_APP_KEY" ) # Change this!
 jwt = JWTManager(app)
 
@@ -72,9 +78,11 @@ def register_user():
         raise APIException("You need to specify the request body as json object", status_code=400)
     if "email" not in body:
         raise APIException("You need to specify the email", status_code=400)
+    #encriptamos el password en la base de datos
+    password_encrypted = bcrypt.generate_password_hash(password, 10).decode('utf-8')
 
     #creada la clase User en la variable new_user
-    new_user = User(email=email, name=name, password=password, is_active=is_active)
+    new_user = User(email=email, name=name, password=password_encrypted, is_active=is_active)
 
     #comitear la sesión
     db.session.add(new_user) #agregamos el nuevo usuario a la base de datos
@@ -591,6 +599,10 @@ def login():
  #Esta veificaicon es para el inicio de la aplicacion Go all the way Up
     """ if password != user.password:
         return jsonify({"message":"Login failed"}), 401 """
+        
+ #validar el password encriptado / esto devuelve True si hay coincidencia 
+    if not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"message":"Login failed"}), 401
 
 # create_access_token() function is used to actually generate the JWT.
     access_token = create_access_token(identity=user.id)
@@ -602,8 +614,9 @@ def login():
 @jwt_required()
 def protected():
     # Access the identity of the current user with get_jwt_identity
-    print("UserName:", user.name)
     current_user = get_jwt_identity()
+    user = User.query.get(current_user)
+    print("UserName:", user.name)
     return jsonify({"Msg":"This is a protected route"}), 200
 
 # this only runs if `$ python src/app.py` is executed
