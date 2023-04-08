@@ -150,7 +150,7 @@ def get_people():
 
 @app.route('/get-people/<int:id>', methods=['GET'])
 def get_specific_people(id):
-    user = People.query.get(id)    
+    people = People.query.get(id)    
   
     return jsonify(people.serialize()), 200
 
@@ -249,9 +249,26 @@ def add_favorite_pleope():
     db.session.add(favorite_people) #agregamos el nuevo usuario a la base de datos
     db.session.commit()
 
-    return jsonify(favorite_people.serialize()), 200
+    return jsonify({
+        "people_name":favorite_people.serialize()["people_name"],
+        "user": favorite_people.serialize()["user_name"]
+    }), 200
 
+@app.route('/removefavoritepeople', methods=['DELETE'])
+def remove_favorite_people():
+    body = request.get_json()
+    user_id = body["user_id"]
+    people_id = body["people_id"]
 
+    favorite_people = FavoritePeople.query.filter_by(user_id=user_id, people_id=people_id).first()
+
+    if not favorite_people:
+        raise APIException('Favorite people not found', status_code=404)
+
+    db.session.delete(favorite_people)
+    db.session.commit()
+
+    return jsonify({"msg":"Favorite People removed "}), 200
 
 #API PLANETS_______________________________
 @app.route('/planets', methods=['GET'])
@@ -404,7 +421,25 @@ def add_favorite_planets():
     db.session.add(favorite_planets) #agregamos el nuevo usuario a la base de datos
     db.session.commit()
 
-    return jsonify(favorite_planets.serialize()), 200
+    return jsonify({"planet_name":favorite_planet.serialize()["planet_name"],
+        "user": favorite_planet.serialize()["user_name"]
+    }), 201
+
+@app.route('/removefavoriteplanet', methods=['DELETE'])
+def remove_favorite_planet():
+    body = request.get_json()
+    user_id = body["user_id"]
+    planet_id = body["planet_id"]
+
+    favorite_planet = FavoritePlanets.query.filter_by(user_id=user_id, planet_id=planet_id).first()
+
+    if not favorite_planet:
+        raise APIException('Favorite planet not found', status_code=404)
+
+    db.session.delete(favorite_planet)
+    db.session.commit()
+
+    return jsonify({"msg":"Favorite planet removed"}), 200
 
 #API VEHICLES_______________________________
 @app.route('/vehicles', methods=['GET'])
@@ -482,7 +517,7 @@ def delete_specific_Vehicles():
     db.session.delete(Vehicles)
     db.session.commit()  
   
-    return jsonify("StartWars Planet Deleted"), 200
+    return jsonify("StartWars Vehicle Deleted"), 200
 
 @app.route('/put-vehicles', methods=['PUT'])
 def edit_Vehicles():
@@ -558,16 +593,57 @@ def add_favorite_vehicles():
     db.session.add(favorite_vehicles) #agregamos el nuevo usuario a la base de datos
     db.session.commit()
 
-    return jsonify(favorite_vehicles.serialize()), 200
+    return jsonify({
+        "vehicle_name": favorite_vehicle.serialize()["vehicle_name"],
+        "user": favorite_vehicle.serialize()["user_name"]
+    }), 201
+
+@app.route('/remove-favorite/vehicle', methods=['DELETE'])
+def remove_favorite_vehicle():
+    body = request.get_json()
+    user_id = body["user_id"]
+    vehicle_id = body["vehicle_id"]
+
+    favorite_vehicle = FavoriteVehicles.query.filter_by(user_id=user_id, vehicle_id=vehicle_id).first()
+
+    if not favorite_vehicle:
+        raise APIException('Favorite vehicle not found', status_code=404)
+
+    db.session.delete(favorite_vehicle)
+    db.session.commit()
+
+    return jsonify({"msg": "Favorite vehicle removed"}), 200
 
 
 # Favorites*************************
-@app.route('/favorites', methods=['GET'])
+@app.route('/favorites', methods=['POST'])
+@jwt_required()
 def list_favorites(user_id):
+    body = request.get_json()
+    user_id = body["user_id"]
     
     user = User.query.get(user_id)
     if not user:
         raise APIException('User Not Found', status_code=404)
+
+    favorite_people = list(map(lambda item: item.serialize()["people_name"], FavoritePeople.query.filter_by(user_id=user.id)))
+    favorite_planets = list(map(lambda item: item.serialize()["planet_name"], FavoritePlanets.query.filter_by(user_id=user.id)))
+    favorite_vehicles = list(map(lambda item: item.serialize()["vehicle_name"], FavoriteVehicles.query.filter_by(user_id=user.id)))
+
+    return jsonify({
+        "msg":"ok",
+        "all_favorites": favorite_people + favorite_planets + favorite_vehicles,
+        "favorite_people": favorite_people,
+        "favorite_planets": favorite_planets,
+        "favorite_vehicles": favorite_vehicles
+    }), 200
+
+@app.route('/favorites/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_favorites(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        raise APIException('User not found', status_code=404)
 
     favorite_people = list(map(lambda item: item.serialize()["people_name"], FavoritePeople.query.filter_by(user_id=user.id)))
     favorite_planets = list(map(lambda item: item.serialize()["planet_name"], FavoritePlanets.query.filter_by(user_id=user.id)))
@@ -619,8 +695,21 @@ def protected():
     print("UserName:", user.name)
     return jsonify({"Msg":"This is a protected route"}), 200
 
-@app.route("/protected", methods=["GET"])
+@app.route("/logout", methods=["POST"])
 @jwt_required()
+def logout():
+    jti = get_jwt()["jti"] #Identificador del JWT (es más corto)
+    now = datetime.now(timezone.utc) 
+
+    # Access the identity of the current user with get_jwt_identity
+    current_user = get_jwt_identity()
+    user = User.query.get(current_user)
+
+    tokenBlocked = TokenBlockedList(token=jti , created_at=now, email=user.email)
+    db.session.add(tokenBlocked)
+    db.session.commit()
+
+    return jsonify({"message":"successfully loggedout "})
 
 
 # this only runs if `$ python src/app.py` is executed
