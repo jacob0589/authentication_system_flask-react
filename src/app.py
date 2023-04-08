@@ -88,7 +88,7 @@ def register_user():
     db.session.add(new_user) #agregamos el nuevo usuario a la base de datos
     db.session.commit() #guardamos los cambios en la base de datos
 
-    return jsonify({"mensaje":"Usuario creado correctamente"}), 201 
+    return jsonify({"mensaje":"NewUser Register Correctly"}), 201 
 
 @app.route('/get-user/<int:id>', methods=['GET'])
 def get_specific_user(id):
