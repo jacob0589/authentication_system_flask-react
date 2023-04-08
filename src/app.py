@@ -619,6 +619,10 @@ def protected():
     print("UserName:", user.name)
     return jsonify({"Msg":"This is a protected route"}), 200
 
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+
+
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
