@@ -695,7 +695,7 @@ def protected():
     print("UserName:", user.name)
     return jsonify({"Msg":"This is a protected route"}), 200
 
-@app.route("/logout", methods=["POST"])
+@app.route("/logout", methods=["GET"])
 @jwt_required()
 def logout():
     jti = get_jwt()["jti"] #Identificador del JWT (es más corto)
