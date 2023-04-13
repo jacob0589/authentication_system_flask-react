@@ -618,9 +618,9 @@ def remove_favorite_vehicle():
 # Favorites*************************
 @app.route('/favorites', methods=['POST'])
 @jwt_required()
-def list_favorites(user_id):
+def list_favorites():
     body = request.get_json()
-    user_id = body["user_id"]
+    user_id = get_jwt_identity()
     
     user = User.query.get(user_id)
     if not user:
