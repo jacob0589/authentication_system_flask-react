@@ -658,9 +658,7 @@ def get_favorites(user_id):
     }), 200
 
 # Login*************************
-# Login*************************
-# Login*************************
-# Login*************************
+
 
 @app.route("/login", methods=["POST"])
 def login():
